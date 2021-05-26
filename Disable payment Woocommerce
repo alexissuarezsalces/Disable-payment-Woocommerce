@@ -1,0 +1,36 @@
+/* Disable payment */
+function semillas() {
+    if ( isset(WC()->cart) ) {
+        $semillas = 0;
+
+        foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) :
+            $cantidad = $cart_item['quantity'];
+            $atributo = $cart_item['data']->get_attribute( 'seeds' );
+
+            if ( $atributo == '3 x 3') {
+                $atributo = 9;
+            } elseif (
+                $atributo == '3 x 5') { $atributo = 15;
+            }
+
+            $semillas += (int)$atributo * $cantidad;
+
+        endforeach;
+        return $semillas;
+    } else {
+        return false;
+    }
+}
+
+add_filter( 'woocommerce_available_payment_gateways', 'bbloomer_disable_above_25' );
+
+function bbloomer_disable_above_25( $available_gateways ) {
+
+    if(semillas() > 24 ) {
+        unset( $available_gateways['pay_gateway_ideal'] );
+        unset( $available_gateways['pay_gateway_giropay'] );
+        unset( $available_gateways['paylike'] );
+    }
+
+    return $available_gateways;
+}
